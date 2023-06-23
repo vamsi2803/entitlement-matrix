@@ -48,7 +48,7 @@ class LoadFile(pyetl.FilePyEtl):
                 "fe_broker.txt"),
                 "sep": "|",
                 "usecols": ["n_broker_id","confidential","restriction_mode",
-                    "firmlevelentitlement"],
+                    "firmlevelentitlement","active_fe"],
                 "low_memory": False,
                 "quoting": QUOTE_ALL,
             }),
@@ -140,7 +140,7 @@ class LoadFile(pyetl.FilePyEtl):
         self.results = OrderedDict([
             ('ac_contributors', {
                 "path_or_buf":os.path.join(self.output_dir,
-                "ac_contributors.txt"),
+                "ac_contributors_test.txt"),
                 "sep":"|",
                 "encoding": 'mbcs',
                 "quoting":QUOTE_ALL,
@@ -220,7 +220,8 @@ class LoadFile(pyetl.FilePyEtl):
             ,"entitle_feed"
             ,"firmlevelentitlement"
             ,"l_watermark"
-            ,"l_linkback"]].drop_duplicates()
+            ,"l_linkback"
+            ,"active_fe"]].drop_duplicates()
         merge_df = merge_df[merge_df["entitle_feed"] == 1]        
         merge_df =  pd.merge(merge_df, self.filermst, on = "iconum")
         merge_df =  pd.merge(merge_df, self.address, on = "iconum",
@@ -256,11 +257,11 @@ class LoadFile(pyetl.FilePyEtl):
         merge_df[["b_client_visible", "l_ent_visible","internal_visible",\
             "l_fer_external", "l_fer_internal", "models_active", 
             "models_internal", "models_external", "models_link_back",\
-            "l_watermark", "fe_entitle"]] = merge_df[["b_client_visible",\
+            "l_watermark", "fe_entitle", "active_fe"]] = merge_df[["b_client_visible",\
             "l_ent_visible","internal_visible", "l_fer_external",\
             "l_fer_internal", "models_active","models_internal",\
             "models_external", "models_link_back", "l_watermark",\
-            "fe_entitle"]].applymap(lambda x: int(x) if not pd.isna(x) else "")
+            "fe_entitle", "active_fe"]].applymap(lambda x: int(x) if not pd.isna(x) else "")
         merge_df["firmlevelentitlement"] = \
             merge_df["firmlevelentitlement"].apply(\
             lambda x: int(x) if not pd.isna(x) else "")
@@ -311,7 +312,7 @@ class LoadFile(pyetl.FilePyEtl):
             ,"l_watermark"
             ,"l_linkback"
             ,"address_id"
-            ]].drop_duplicates()
+            ,"active_fe"]].drop_duplicates()
         merge_df['Rank_row'] = merge_df.sort_values(['contrib_comp_id',
             'b_client_visible'],ascending=[False,False]).groupby([
             'contrib_comp_id','contrib_comp_address1']).cumcount() + 1
@@ -348,6 +349,7 @@ class LoadFile(pyetl.FilePyEtl):
             ,"firmlevelentitlement"
             ,"l_watermark"
             ,"l_linkback"
+            ,"active_fe"
             ]].drop_duplicates()
         merge_df = merge_df[~merge_df['iconum'].isin(iconum_list)]
         merge_df =  pd.merge(merge_df, self.filermst, on="iconum")
@@ -378,11 +380,11 @@ class LoadFile(pyetl.FilePyEtl):
         merge_df[["b_client_visible","l_ent_visible","internal_visible",\
             "l_fer_external","l_fer_internal","models_active",\
             "models_internal","models_external","models_link_back",\
-            "l_watermark","fe_entitle"]] = merge_df[["b_client_visible",\
+            "l_watermark","fe_entitle", "active_fe"]] = merge_df[["b_client_visible",\
             "l_ent_visible","internal_visible","l_fer_external",\
             "l_fer_internal","models_active","models_internal",\
             "models_external","models_link_back","l_watermark",\
-            "fe_entitle"]].applymap(lambda x: int(x) if not pd.isna(x) else "")
+            "fe_entitle", "active_fe"]].applymap(lambda x: int(x) if not pd.isna(x) else "")
         merge_df["firmlevelentitlement"] = \
             merge_df["firmlevelentitlement"].apply(\
             lambda x: int(x) if not pd.isna(x) else "")
@@ -431,7 +433,8 @@ class LoadFile(pyetl.FilePyEtl):
             ,"fe_entitle"
             ,"firmlevelentitlement"
             ,"l_watermark"
-            ,"l_linkback"]].drop_duplicates()
+            ,"l_linkback"
+            ,"active_fe"]].drop_duplicates()
         # 1 AS Rank_row
         merge_df["Rank_row"] = 1
         merge_df = pd.concat([merge_df1, merge_df]).drop_duplicates(subset=[
@@ -463,6 +466,7 @@ class LoadFile(pyetl.FilePyEtl):
             ,"firmlevelentitlement"
             ,"l_watermark"
             ,"l_linkback"
+            ,"active_fe"
         ])
         merge_df.sort_values(by = ['contrib_comp_id'], ascending=True)
         merge_df = merge_df[merge_df["Rank_row"] == 1]
@@ -495,7 +499,8 @@ class LoadFile(pyetl.FilePyEtl):
             ,"fe_entitle"
             ,"firmlevelentitlement"
             ,"l_watermark"
-            ,"l_linkback"]].drop_duplicates()
+            ,"l_linkback"
+            ,"active_fe"]].drop_duplicates()
         merge_df[["Active_Status","models_contributor_type"]] = \
             merge_df[["Active_Status", "models_contributor_type"]].applymap(
                 lambda x: str(x).rstrip() if not pd.isna(x) else "")
@@ -509,7 +514,7 @@ class LoadFile(pyetl.FilePyEtl):
             "models_active","models_internal","models_external",
             "models_contributor_type","models_link_back","restriction_mode",
             "confidential","fe_entitle","firmlevelentitlement","l_watermark",
-            "l_linkback"]] = merge_df[["contrib_comp_id","contrib_comp_name",
+            "l_linkback","active_fe"]] = merge_df[["contrib_comp_id","contrib_comp_name",
             "contrib_comp_address1","contrib_comp_address2",
             "contrib_comp_address3","contrib_comp_city",
             "contrib_comp_state","contrib_comp_zip","contrib_comp",
@@ -518,7 +523,7 @@ class LoadFile(pyetl.FilePyEtl):
             "FER_External","FER_Internal","fe_broker_id","models_active",
             "models_internal","models_external","models_contributor_type",
             "models_link_back","restriction_mode","confidential","fe_entitle",
-            "firmlevelentitlement","l_watermark","l_linkback"]].applymap(\
+            "firmlevelentitlement","l_watermark","l_linkback","active_fe"]].applymap(\
             lambda x : '' if str(x).lower()=="nan" else str(x).strip())
         try:
             self.ac_contributors = merge_df
